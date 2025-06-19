@@ -48,8 +48,8 @@ To download the Unity Tennis environment:
 - Windows (64-bit): https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis_Windows_x86_64.zip
 
 
-# DDPG:
-DDPG or Deep Deterministic Policy Gradient is the algorithem used in this project to solve the enviroment, DDPG is a different kind of actor-critic method, and it could be seen as an approximate DQN instead of an actual actor-critic, because the critic in DDPG is used to approximate the maximizer over the Q values of the next state and not as a baseline.
+# MDDPG:
+MDDPG is a variation of DDPG or Deep Deterministic Policy Gradient for multi-agent enviroments, MDDPG is the algorithm used in this project to solve the enviroment. DDPG is a different kind of actor-critic method, and it could be seen as an approximate DQN instead of an actual actor-critic, because the critic in DDPG is used to approximate the maximizer over the Q values of the next state and not as a baseline.
 One of the limitations of the DQN agent is that it is not straightforward to use in continuous action spaces
 In DDPG we use two deep neural networks, we call one the actor and the other one is the critic:
 -  Actor: takes the state S as input, and outputs the optimal policy deterministically, the output is the best believed action for any given state unlike the discrete case where the output is a probability distribution over all possible actions, the actor is basically learning the argmax Q(s,a)
@@ -90,9 +90,10 @@ The code is adopted from Udacity but with the following changes (adapted to the 
 - Modified the training loop to adapt with the Unity environment, also made the updates to occur every 10 time-steps, and it updates the networks 10 times
 
 **The environment was solved in 3671 episodes, as the graph below indicates**
-![alt text](https://github.com/FMajdali/Continuous-Control-RL/blob/main/DDPG%20Training%20Graph.jpg))
+![alt text](https://github.com/FMajdali/Collaboration-and-Competition-RL/blob/main/MDDPG%20Training%20Graph.jpg))
 
 
 # Future Ideas:
-Another approach could be used to solve the problem like A2C, A3C, or D4PG.
-Another hyperparameter could be tested to see if there is any enhancement to the model convergence and scores
+- Another approach could be used to solve the problem like A2C, A3C, or D4PG.
+- Another hyperparameter could be tested to see if there is any enhancement to the model convergence and scores
+- I could not find any documentation for the Tennis environment, the idea is that it is possible to transform observations gained by agent 2 from the perspective of agent 1, the transformed observation will be fed then into the actor-critic model and the actions produced by it will be inverted to be usable by agent 2, this approach will speed up the learning as all experiences are from one perspective and will produce self-play agent
