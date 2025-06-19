@@ -5,9 +5,9 @@ The code used in this solution is adopted from the Udacity repository below, and
 https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-bipedal
 
 # Repository files:
-- Continuous_Control.ipynb: The Jupyter notebook provided by Udacity for this project, contains the initial instructions and the training loop that initializes the agents and networks and starts the learning process.
+- Tennis.ipynb: The Jupyter notebook provided by Udacity for this project, contains the initial instructions and the training loop that initializes the agents and networks and starts the learning process.
 - model.py: contains the neural network architecture for both Actor and Critic
-- ddpg_agent.py: contains a class named Agent, which have all the required methods to train the agent
+- ddpg_agent.py: contains a class named Agent, which has all the required methods to train the agent
 - checkpoint_critic.pth: contains the trained weights for the critic network
 - checkpoint_actor.pth: contains the trained weights for the actor network
 
@@ -25,22 +25,27 @@ https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-bipedal
 - pandas
 - scipy
 - ipykernel
+- protobuf==3.20.3
 
 # Environment:
-The environment is provided by Unity with the name "reacher", in this environment a double-jointed arm can move to target locations. A reward of +0.1 is provided for each step that the agent's hand is in the goal location. Thus, the goal of the agent is to maintain its position at the target location for as many time steps as possible.
+The environment is provided by Unity with the name "Tennis", In this environment, two agents control rackets to bounce a ball over a net. If an agent hits the ball over the net, it receives a reward of +0.1. If an agent lets a ball hit the ground or hits the ball out of bounds, it receives a reward of -0.01. Thus, the goal of each agent is to keep the ball in play. 
 
-The observation space consists of 33 variables corresponding to position, rotation, velocity, and angular velocities of the arm. Each action is a vector with four numbers, corresponding to the torque applicable to two joints. Every entry in the action vector should be a number between -1 and 1.
+The observation space consists of 8 variables corresponding to the position and velocity of the ball and racket. Each agent receives its own, local observation. 
 
-This project solves the second Version of the reacher environment, which contains 20 identical agents, each with its own copy of the environment.
+Two continuous actions are available, corresponding to movement toward (or away from) the net, and jumping. 
 
-In each episode, each agent's score is calculated separately by summing all rewards it gets without discounting, and then the average of all agents is calculated and considered to be the total score of the episode.
-The environment is considered solved when the 100-episode moving average of agents' average scores is at least +30
+The task is episodic, and in order to solve the environment, the agents must get an average score of +0.5 (over 100 consecutive episodes, after taking the maximum over both agents). 
 
-To download the Unity Reacher environment:
-- Linux: https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Linux.zip
-- Mac OSX: https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher.app.zip
-- Windows (32-bit): https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Windows_x86.zip
-- Windows (64-bit): https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Windows_x86_64.zip
+Specifically:
+- After each episode, we add up the rewards that each agent received (without discounting), to get a score for each agent. This yields 2 (potentially different) scores. We then take the maximum of these 2 scores.
+- This yields a single score for each episode.
+The environment is considered solved when the average (over 100 episodes) of those scores is at least +0.5.
+
+To download the Unity Tennis environment:
+- Linux: https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis_Linux.zip
+- Mac OSX: https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis.app.zip
+- Windows (32-bit): https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis_Windows_x86.zip
+- Windows (64-bit): https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis_Windows_x86_64.zip
 
 
 # DDPG:
@@ -66,25 +71,25 @@ Two interesting aspects of DDPG are:
 
 # Neural Networks Architecture:
 - Actor Network consists of:
-    - Fully connected layer which takes the state with the size 33, and outputs 256
-    - Fully connected layer which takes the ReLU of the output of the previous layer and outputs 4 logits, each representing an action
+    - Fully connected layer which takes the state with the size 24, and outputs 256
+    - Fully connected layer which takes the ReLU of the output of the previous layer and outputs 2 logits, each representing an action
     - The output from the previous layer is passed through a tanh to ensure the output actions are between -1 and 1 
 
 - Critc Network consists of:
-    - Fully connected layer which takes the state with the size 33, and outputs 256
+    - Fully connected layer which takes the state with the size 24, and outputs 256
     - Fully connected layer which takes the Leaky ReLU of the output of the previous layer along the actions chosen by the actor with size 260 and outputs 256
     - Fully connected layer which takes the Leaky ReLU of the output of the previous layer and outputs 128
     - Fully connected layer which takes the Leaky ReLU of the output of the previous layer and outputs 1 logit which resembles the State-Value
 
 # Solution:
 
-The code is adopted from Udacity but with the following changes (adapted to 2 agents):
-- Created a new method for the agent class "update_memory" to update the replay memory using experiences from the 20 agents
+The code is adopted from Udacity but with the following changes (adapted to the multi-agent nature of Tennis env):
+- The same actor networkis used for both agents, the actor network receives the observation of one agent (24 elements) and outputs the deterministic two actions for that agent to take
+- Created a new method for the agent class "update_memory" to update the replay memory using experiences from the 2 agents, it separates each agent experience tuple and stores it separately 
 - Modified the "step" method in the agent class by removing the update memory from it
-- Modified the "sample" method in the OUNoise class to generate a different noise for each agent and action
-- Modified the training loop to adapt with the Unity environment, also made the updates to occur every 20 time-steps, and it updates the networks 10 times
+- Modified the training loop to adapt with the Unity environment, also made the updates to occur every 10 time-steps, and it updates the networks 10 times
 
-**The environment was solved in 20 episodes, as the graph below indicates**
+**The environment was solved in 3671 episodes, as the graph below indicates**
 ![alt text](https://github.com/FMajdali/Continuous-Control-RL/blob/main/DDPG%20Training%20Graph.jpg))
 
 
